@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
+import axios from "axios"; //pake axios aja ya dik :)
 import "keen-slider/keen-slider.min.css";
 import KeenSlider from "keen-slider";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -20,90 +21,108 @@ const FrameData = [
   { id: 3, url: Frame, alt: "Frame 1" },
 ];
 
-const endPoint =
-  "https://smataco.my.id/dev/unez/CariRumahAja/api/contribution.php";
-
-const endpointimage = `https://smataco.my.id/api_digicon/assets/images/`;
-
-const cardData = [
-  {
-    title: "Perumahan Griya 1",
-    location: "Jakarta Timur",
-    price: "Rp 2.589.500",
-    size: "LT 97m² | LB 78m² | L1",
-  },
-  {
-    title: "Perumahan Griya 2",
-    location: "Jakarta Barat",
-    price: "Rp 2.100.000",
-    size: "LT 90m² | LB 75m² | L2",
-  },
-  {
-    title: "Perumahan Griya 3",
-    location: "Jakarta Utara",
-    price: "Rp 3.000.000",
-    size: "LT 100m² | LB 85m² | L1",
-  },
-  {
-    title: "Perumahan Griya 4",
-    location: "Jakarta Selatan",
-    price: "Rp 2.750.000",
-    size: "LT 120m² | LB 90m² | L2",
-  },
-  {
-    title: "Perumahan Griya 5",
-    location: "Jakarta Timur",
-    price: "Rp 2.300.000",
-    size: "LT 110m² | LB 95m² | L1",
-  },
-];
+// const cardData = [
+//   {
+//     title: "Perumahan Griya 1",
+//     location: "Jakarta Timur",
+//     price: "Rp 2.589.500",
+//     size: "LT 97m² | LB 78m² | L1",
+//   },
+//   {
+//     title: "Perumahan Griya 2",
+//     location: "Jakarta Barat",
+//     price: "Rp 2.100.000",
+//     size: "LT 90m² | LB 75m² | L2",
+//   },
+//   {
+//     title: "Perumahan Griya 3",
+//     location: "Jakarta Utara",
+//     price: "Rp 3.000.000",
+//     size: "LT 100m² | LB 85m² | L1",
+//   },
+//   {
+//     title: "Perumahan Griya 4",
+//     location: "Jakarta Selatan",
+//     price: "Rp 2.750.000",
+//     size: "LT 120m² | LB 90m² | L2",
+//   },
+//   {
+//     title: "Perumahan Griya 5",
+//     location: "Jakarta Timur",
+//     price: "Rp 2.300.000",
+//     size: "LT 110m² | LB 95m² | L1",
+//   },
+// ];
 
 export default function Home() {
+  const [rumahTerdekat, setrumahTerdekat] = useState([]);
   const [slider, setSlider] = useState(null);
   const [sliderTerdekat, setSliderTerdekat] = useState(null);
   const [sliderFitur, setSliderFitur] = useState(null);
   const sliderRef = useRef(null);
   const sliderTerdekatRef = useRef(null);
   const sliderFiturRef = useRef(null);
-  const [slidesPerView, setSlidesPerView] = useState(3);
+  const [slidesPerView, setSlidesPerView] = useState(5); // Menampilkan 3 slide per tampilan
   const swiperContainerRef = useRef(null);
-  const [data, setData] = useState([]);
+  const [location, setLocation] = useState({ lat: null, lng: null });
+  const [province, setProvince] = useState(null);
+  const [latitude, setLatitude] = useState(null);
+  const [longitude, setLongitude] = useState(null);
+  const [city,setCity] = useState(null)
+  const KeyMaps = "AIzaSyDtRAmlhx3Ada5pVl5ilzeHP67TLxO6pyo";
+  let ApiContribution =
+    "https://smataco.my.id/dev/unez/CariRumahAja/api/rumahterdekat.php";
+  //?latitude=-6.3474679&longitude=106.8246569&page=1
 
-  const ambilDataTerdekat = () => {
-    fetch(endPoint)
+  const endpointImage = "https://smataco.my.id/api_digicon/assets/images/";
+
+  const GetData = async (lat, lng) => {
+    console.log(
+      ApiContribution + "?latitude=" + lat + "&longitude=" + lng + "&page=1"
+    );
+    await fetch(
+      ApiContribution + "?latitude=" + lat + "&longitude=" + lng + "&page=1"
+    )
       .then((res) => res.json())
       .then((response) => {
         console.log(response);
-        setData(response);
-        // for (let i = 0; i < 5; i++) {
-        //   console.log(response[i].ref_id + " " + response[i].image);
-        //   let cluster = response[i].cluster_apart_name;
-        //   let square_land = response[i].square_land;
-        //   let square_building = response[i].square_building;
-        //   let city = response[i].city;
-        //   let property_floor = response[i].property_floor;
-        //   let ref_id = response[i].ref_id;
-        //   setData({
-        //     cluster: cluster,
-        //     square_land: square_land,
-        //     square_building: square_building,
-        //     city: city,
-        //     property_floor: property_floor,
-        //     ref_id: ref_id,
-        //   });
-        //   console.log(data.length);
-        // }
-        // console.log(response[0]);
-        // console.log(response[0].image);
+        setrumahTerdekat(response);
+        // console.log(rumahTerdekat.length);
       });
   };
+  const textLocation = async () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        // setLatitude(position.coords.latitude);
+        // setLongitude(position.coords.longitude);
+          fetch(
+          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=${KeyMaps}`
+        )
+        .then((res) => res.json())
+        .then((response) => { 
+          console.log(response);
+        console.log("alamat=" + response.results[0].formatted_address);
+        const city = response.results[0].address_components.find(
+          (component) => component.types[0].includes("administrative_area_level_2")
+        ).long_name;
+        setCity(city);
+      });
+        // //Get Data Rumah
+        GetData(position.coords.latitude, position.coords.longitude);
+      });
 
-  const title = [data.cluster];
-  console.log(title);
-
+      // await
+    } else {
+      console.log("Browser anda tidak supprt Geolocation");
+    }
+    // const filteredRumahDekat = rumahdekat.filter(
+    //   (item) => item.latitude === latitude && item.longitude === longitude
+    // );
+  };
   useEffect(() => {
-    ambilDataTerdekat();
+    textLocation();
   }, []);
+
 
   useEffect(() => {
     const updateSlidesPerView = () => {
@@ -119,7 +138,7 @@ export default function Home() {
     };
 
     updateSlidesPerView();
-    window.addEventListener("resize", updateSlidesPerView); //
+    window.addEventListener("resize", updateSlidesPerView);
 
     return () => window.removeEventListener("resize", updateSlidesPerView);
   }, []);
@@ -186,12 +205,13 @@ export default function Home() {
             <h3 className="font-semibold xl:text-2xl lg:text-2xl md:text-2xl text-lg">
               Rumah Terdekat
             </h3>
-
             <h3 className="flex xl:justify-center lg:justify-center md:justify-center justify-normal gap-1">
+              {city}
               <span>
                 <img src={Location} width="25px" height="25px" />
               </span>
-              Jakarta
+              {/* {rumahTerdekat.city} */}
+              {province}
             </h3>
           </div>
           <div>
@@ -204,51 +224,67 @@ export default function Home() {
           </div>
         </div>
         <div className="flex justify-center mt-20">
-          <Swiper
-            effect="coverflow"
-            grabCursor={true}
-            centeredSlides={true}
-            loop={true}
-            slidesPerView={slidesPerView}
-            coverflowEffect={{
-              rotate: 0,
-              stretch: 0,
-              depth: 100,
-              modifier: 2.5,
-            }}
-            modules={[EffectCoverflow, Navigation]}
-            className="swiper_container"
-            ref={swiperContainerRef}
-          >
-            {data.map((item, index) => (
-              <SwiperSlide key={index}>
-                <div className="xl:w-[468px] lg:w-[400px] md:w-[400px] h-auto rounded-xl overflow-hidden shadow-lg">
-                <img src = {(`https://smataco.my.id/api_digicon/assets/images/${item.image}`)}  className="w-full bg-gray-300 h-[200px]" />
-                  <div className="flex bg-gray-100 items-center justify-between p-2.5 gap-2.5">
-                    <div>
-                      <h3 className="xl:text-xl lg:text-xl md:text-xl text-md font-semibold text-gray-800">
-                        {item.cluster_apart_name}
-                      </h3>
-                      <p className="text-gray-700 xl:text-base lg:text-base md:text-base text-sm">
-                        {item.city}
-                      </p>
-                      <p className="xl:text-sm lg:text-sm md:text-sm text-xs text-gray-400 mt-2">
-                        LB { item.square_building} | LT {item.square_land} | L {item.property_floor}
-                      </p>
-                    </div>
-                    <div>
-                      <h3 className="text-gray-800 rounded-lg font-semibold xl:text-sm lg:text-lg md:text-lg text-base bg-yellow-400 xl:px-8 lg:px-8 md:px-8 px-2 h-12  ">
-                        {`Rp${item.price_land_per_meter}` }
-                      </h3>
-                      <h3 className="text-gray-700 xl:text-sm lg:text-sm md:text-sm text-xs text-end">
-                        Transaksi
-                      </h3>
+          {rumahTerdekat.length === 0 ? (
+            <p className="text-gray-600 md:text-2xl text-lg text-center">
+              Tidak ada rumah ditemukan di wilayah Anda.
+            </p>
+          ) : (
+            <Swiper
+              effect="coverflow"
+              grabCursor={true}
+              centeredSlides={true}
+              loop={true}
+              slidesPerView={slidesPerView}
+              coverflowEffect={{
+                rotate: 0,
+                stretch: 0,
+                depth: 100,
+                modifier: 2.5,
+                slideShadows: false,
+              }}
+              modules={[EffectCoverflow, Navigation]}
+              className="swiper_container"
+              ref={swiperContainerRef}
+            >
+              {rumahTerdekat.map((item, index) => (
+                <SwiperSlide key={index}>
+                  <div className="xl:w-[468px] lg:w-[400px] md:w-[400px] h-auto rounded-xl overflow-hidden shadow-lg">
+                    <img
+                      src={
+                        item.image
+                          ? `${endpointImage}${item.image}` // coba2 aja
+                          : "/path/to/default-image.png"
+                      }
+                      alt={item.cluster_apart_name}
+                      className="w-full bg-gray-300 h-[200px] object-cover"
+                    />
+                    <div className="flex bg-gray-100 items-center justify-between p-2.5 gap-2.5">
+                      <div>
+                        <h3 className="xl:text-xl lg:text-xl md:text-xl text-md font-semibold text-gray-800">
+                          {item.cluster_apart_name}
+                        </h3>
+                        <p className="text-gray-700 xl:text-base lg:text-base md:text-base text-sm">
+                          {item.city}
+                        </p>
+                        <p className="xl:text-sm lg:text-sm md:text-sm text-xs text-gray-400 mt-2">
+                          LB {item.square_building} | LT {item.square_land} | L{" "}
+                          {item.property_floor}
+                        </p>
+                      </div>
+                      <div>
+                        <h3 className="text-gray-800 rounded-lg font-semibold xl:text-lg lg:text-lg md:text-lg text-base bg-yellow-400 xl:px-8 lg:px-8 md:px-8 px-2 py-1.5">
+                          {`Rp${item.price_land_per_meter}`}
+                        </h3>
+                        <h3 className="text-gray-700 xl:text-sm lg:text-sm md:text-sm text-xs text-end">
+                          Transaksi
+                        </h3>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </SwiperSlide>
-            ))}
-          </Swiper>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          )}
         </div>
       </div>
 
@@ -288,6 +324,7 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Mobile */}
       <div className="md:hidden block mx-5">
         <div className="keen-slider my-10" ref={sliderFiturRef}>
           <div className="keen-slider__slide flex flex-col md:flex-row justify-center items-center gap-8 bg-white p-5 rounded-2xl shadow-lg">
