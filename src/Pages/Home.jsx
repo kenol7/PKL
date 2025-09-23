@@ -68,13 +68,13 @@ export default function Home() {
   const [province, setProvince] = useState(null);
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
-  const [city,setCity] = useState(null)
+  const [city, setCity] = useState(null);
   const KeyMaps = "AIzaSyDtRAmlhx3Ada5pVl5ilzeHP67TLxO6pyo";
   let ApiContribution =
     "https://smataco.my.id/dev/unez/CariRumahAja/api/rumahterdekat.php";
   //?latitude=-6.3474679&longitude=106.8246569&page=1
 
-  const endpointImage = "https://smataco.my.id/api_digicon/assets/images/";
+  const endpointImage = "https://smataco.my.id/dev/unez/CariRumahAja/foto/rumah.jpg";
 
   const GetData = async (lat, lng) => {
     console.log(
@@ -95,18 +95,19 @@ export default function Home() {
       navigator.geolocation.getCurrentPosition((position) => {
         // setLatitude(position.coords.latitude);
         // setLongitude(position.coords.longitude);
-          fetch(
+        fetch(
           `https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=${KeyMaps}`
         )
-        .then((res) => res.json())
-        .then((response) => { 
-          console.log(response);
-        console.log("alamat=" + response.results[0].formatted_address);
-        const city = response.results[0].address_components.find(
-          (component) => component.types[0].includes("administrative_area_level_2")
-        ).long_name;
-        setCity(city);
-      });
+          .then((res) => res.json())
+          .then((response) => {
+            console.log(response);
+            console.log("alamat=" + response.results[0].formatted_address);
+            const city = response.results[0].address_components.find(
+              (component) =>
+                component.types[0].includes("administrative_area_level_2")
+            ).long_name;
+            setCity(city);
+          });
         // //Get Data Rumah
         GetData(position.coords.latitude, position.coords.longitude);
       });
@@ -122,7 +123,6 @@ export default function Home() {
   useEffect(() => {
     textLocation();
   }, []);
-
 
   useEffect(() => {
     const updateSlidesPerView = () => {
@@ -171,6 +171,7 @@ export default function Home() {
 
   return (
     <div>
+      {/* iklan */}
       <div className="relative my-10">
         <Search />
         <div className="keen-slider mt-8" ref={sliderRef}>
@@ -273,7 +274,14 @@ export default function Home() {
                       </div>
                       <div>
                         <h3 className="text-gray-800 rounded-lg font-semibold xl:text-lg lg:text-lg md:text-lg text-base bg-yellow-400 xl:px-8 lg:px-8 md:px-8 px-2 py-1.5">
-                          {`Rp${item.price_land_per_meter}`}
+                          {`Rp${
+                            item.property_price
+                              ? new Intl.NumberFormat("id-ID").format(
+                                  item.property_price
+                                )
+                              : "N/A"
+                          }
+                          `}
                         </h3>
                         <h3 className="text-gray-700 xl:text-sm lg:text-sm md:text-sm text-xs text-end">
                           Transaksi

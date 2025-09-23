@@ -1,75 +1,23 @@
 import { Menu, Send, X, Edit } from "lucide-react";
 import Navbar from "../Components/Navbar";
-import { useState, useEffect } from "react";
-import { Podcast } from "lucide-react";
-import axios from "axios";
+import { useState } from "react";
 
 export default function ChatBot() {
   const [message, setMessage] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-  const [latitude, setLatitude] = useState(null);
-  const [longitude, setLongitude] = useState(null);
-  const [textLocation, settextLocation] = useState([null]);
-
-  const KeyMaps = "AIzaSyDtRAmlhx3Ada5pVl5ilzeHP67TLxO6pyo";
-  const endpoint = "https://smataco.my.id/engine/sendwhatsapp";
-  const noTaeget = "081290778869";
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(endPoint);
-        settextLocation(response.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-    fetchData();
-
-    const sendText = () => {
-      fetch(endpoint + "/?type=text&phone=" + noTaeget + "&message=inigambar")
-        .then((res) => res.text())
-        .then((Response) => console.log(Response));
-    };
-
-    const textLocation = async () => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((position) => {
-          setLatitude(position.coords.latitude);
-          setLongitude(position.coords.longitude);
-          fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=${KeyMaps}`
-          )
-            .then((res) => res.json())
-            .then((response) => {
-              console.log("alamat=" + response.results[0].formatted_address);
-              const postalCode = response.results[0].address_components.find(
-                (component) => component.types.includes("postal_code")
-              ).long_name;
-              console.log(postalCode);
-            });
-        });
-
-        // await
-      } else {
-        console.log("Browser anda tidak supprt Geolocation");
-      }
-      const filteredRumahDekat = rumahdekat.filter(
-        (item) => item.latitude === latitude && item.longitude === longitude
-      );
-    };
-  }, []);
 
   return (
     <>
       <section className="min-h-screen">
         <Navbar />
         <div className="flex flex-col items-center gap-y-30 bg-white p-4 relative overflow-hidden">
+          {/* Sidebar */}
           <div
             className={`fixed top-25 left-0 h-full w-64 bg-gray-100 shadow-lg transform transition-transform duration-300 z-50 ${
               isOpen ? "translate-x-0" : "-translate-x-full"
             }`}
           >
+            {/* Header Sidebar */}
             <div className="flex items-center justify-between p-4 border-b bg-gray-100">
               <h2 className="font-semibold text-lg">History</h2>
               <button onClick={() => setIsOpen(false)} className="p-1">
@@ -77,7 +25,9 @@ export default function ChatBot() {
               </button>
             </div>
 
+            {/* Content Sidebar */}
             <div className="p-4 space-y-1">
+              {/* menu */}
               <button className="flex gap-2 ">
                 <Edit size={20} />
                 <p>New Chat</p>
@@ -95,36 +45,30 @@ export default function ChatBot() {
             </div>
           </div>
 
+          {/* Header with toggle button */}
           <div className="w-full flex justify-start">
             <button onClick={() => setIsOpen(true)} className="p-2">
               <Menu size={24} />
             </button>
           </div>
 
+          {/* Main Option */}
           <div className="grid grid-cols-2 gap-8">
-            <button
-              className="px-3 py-6 rounded-md bg-yellow-200 shadow border hover:bg-yellow-600 transition"
-              // onClick={sendText}
-            >
-              Kirim pesan
-            </button>
-            <button
-              className="px-3 py-6 rounded-md bg-yellow-200 shadow border hover:bg-yellow-600 transition"
-              // onClick={sendText}
-            >
-              kirim gambar
+            <button className="px-3 py-6 rounded-md bg-yellow-200 shadow border hover:bg-yellow-600 transition">
+              Kalkulator KPR
             </button>
             <button className="px-3 py-6 rounded-md bg-yellow-200 shadow border hover:bg-yellow-600 transition">
-              kirim file
+              Cari rumah
             </button>
-            <button
-              className="px-3 py-6 rounded-md bg-yellow-200 shadow border hover:bg-yellow-600 transition"
-              onClick={textLocation}
-            >
+            <button className="px-3 py-6 rounded-md bg-yellow-200 shadow border hover:bg-yellow-600 transition">
+              Tanya properti
+            </button>
+            <button className="px-3 py-6 rounded-md bg-yellow-200 shadow border hover:bg-yellow-600 transition">
               Funfact Lokasi Properti
             </button>
           </div>
 
+          {/* Chatbot input */}
           <div className="w-full max-w-6xl flex items-center gap-1">
             <input
               type="text"
